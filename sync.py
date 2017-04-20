@@ -20,7 +20,6 @@ def verify_url(url, url_type):
     else:
         return False
 
-
 def url_split(url):
     pattern = re.compile(r'=')
     return re.split(pattern, url)[1]
@@ -32,11 +31,11 @@ def write_db(i):
         title=i['title'],
         artist=i['artist'],
         album=i['album'],
-        cover='http://nyandn.b0.upaiyun.com/cover/' +
+        cover='http://static.nyan.ac.cn/nyanfm/cover/' +
         i['artist'] + ' - ' + i['title'] + '.jpg',
-        mp3='http://nyandn.b0.upaiyun.com/mp3/' +
+        mp3='http://static.nyan.ac.cn/nyanfm/mp3/' +
         i['artist'] + ' - ' + i['title'] + '.mp3',
-        ogg='http://nyandn.b0.upaiyun.com/mp3/' +
+        ogg='http://static.nyan.ac.cn/nyanfm/mp3/' +
         i['artist'] + ' - ' + i['title'] + '.mp3'
     )
     try:
