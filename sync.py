@@ -1,31 +1,63 @@
-#coding:utf8
+# coding:utf8
 import re
 import os
 import sys
 
 from api import *
 from configure import *
+from db import *
 
-#设置系统默认编码模式
+# 设置系统默认编码模式
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-def verify_url(url,url_type):
-    pattern = re.compile(r'http:\/\/music\.163\.com\/#\/' + url_type + '\?id=[0-9]+')#判断输入的url符合规则
-    pattern2 = re.compile(r'http:\/\/music\.163\.com\/#\/' + url_type + '\?id=[0-9]+[^\d]+')#如果正常url后面跟有非数字的字符>
-    if re.match(pattern,url) and not re.match(pattern2,url):
+
+def verify_url(url, url_type):
+    pattern = re.compile(r'http:\/\/music\.163\.com\/#\/' + url_type + '\?id=[0-9]+')  # 判断输入的url符合规则
+    pattern2 = re.compile(r'http:\/\/music\.163\.com\/#\/' + url_type + '\?id=[0-9]+[^\d]+')  # 如果正常url后面跟有非数字的字符>
+    if re.match(pattern, url) and not re.match(pattern2, url):
         return True
     else:
         return False
 
+
 def url_split(url):
     pattern = re.compile(r'=')
-    return re.split(pattern,url)[1]
+    return re.split(pattern, url)[1]
+
+
+def write_db(i):
+    song = Song(
+        song_id=i['id'],
+        title=i['title'],
+        artist=i['artist'],
+        album=i['album'],
+        cover='http://nyandn.b0.upaiyun.com/cover/' +
+        i['artist'] + ' - ' + i['title'] + '.jpg',
+        mp3='http://nyandn.b0.upaiyun.com/mp3/' +
+        i['artist'] + ' - ' + i['title'] + '.mp3',
+        ogg='http://nyandn.b0.upaiyun.com/mp3/' +
+        i['artist'] + ' - ' + i['title'] + '.mp3'
+    )
+    try:
+        song.save()
+        print '**db succeed**'
+    except:
+        print '!!!db error!!!'
+    return True
+
 
 def play_list(url):
+    wget_prefix = "wget --header='Connection: keep-alive' "\
+        + "--header='Pragma: no-cache'"\
+        + "--header='Cache-Control: no-cache'"\
+        + "--header='Upgrade-Insecure-Requests: 1'"\
+        + "--header='User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3070.0 Safari/537.36'"\
+        + "--header='Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'"\
+        + "--header='Accept-Encoding: gzip, deflate' --header='Accept-Language: zh-CN,zh;q=0.8,en;q=0.6' \'"
     ne = NetEase()
     url_valid = verify_url(url, 'playlist')
-    id_legal =True
+    id_legal = True
     if url_valid:
         playlist_id = url_split(url)
         valid = True
@@ -39,30 +71,35 @@ def play_list(url):
         try:
             for i in ne.playlist_detail(playlist_id):
                 song_item = {
-                        'id':i['id'],
-                        'title':i['name'],
-                        'artist':i['artists'][0]['name'],
-                        'album':i['album']['name'],
-                        'cover_url':i['album']['picUrl'],
-                        'mp3_url':ne.songs_detail_new_api([i['id']])[0]['url']
-                        }
+                    'id': i['id'],
+                    'title': i['name'],
+                    'artist': i['artists'][0]['name'],
+                    'album': i['album']['name'],
+                    'cover_url': i['album']['picUrl'],
+                    'mp3_url': ne.songs_detail_new_api([i['id']])[0]['url']
+                }
                 song_list.append(song_item)
-                mp3_path_name = mp3_path + i['artists'][0]['name'] + ' - ' + i['name'] + '.mp3'
-                cover_path_name = cover_path + i['artists'][0]['name'] + ' - ' + i['name'] + '.jpg'
+                mp3_path_name = mp3_path + \
+                    i['artists'][0]['name'] + ' - ' + i['name'] + '.mp3'
+                cover_path_name = cover_path + \
+                    i['artists'][0]['name'] + ' - ' + i['name'] + '.jpg'
+                print '------------'
                 print mp3_path_name
-                print ne.songs_detail_new_api([i['id']])[0]['url']
-                if  os.path.exists(mp3_path_name) == False and ne.songs_detail_new_api([i['id']])[0]['url'] != None:
+                if os.path.exists(mp3_path_name) == False and ne.songs_detail_new_api([i['id']])[0]['url'] != None:
                     try:
-                        os.system('wget \'' + convert_url(ne.songs_detail_new_api([i['id']])[0]['url']) + '\' -O \'' + mp3_path_name + '\'')
-                        os.system('wget \'' + i['album']['picUrl'] + '\' -O \'' + cover_path_name + '\'')
-                        write_file(song_item)
-                        print 'downloaded.'
+                        os.system(wget_prefix + convert_url(ne.songs_detail_new_api(
+                            [i['id']])[0]['url']) + '\' -O \'' + mp3_path_name + '\'')
+                        os.system(
+                            wget_prefix + i['album']['picUrl'] + '\' -O \'' + cover_path_name + '\'')
+                        # write_file(song_item)
+                        write_db(song_item)
+                        print '**downloaded.**'
                     except:
-                        print 'error while download.'
+                        print '!!!error while download.!!!'
                 elif ne.songs_detail_new_api([i['id']])[0]['url'] == None:
-                    print 'resouce not found'
+                    print '!!!resouce not found!!!'
                 else:
-                    print 'already exists, skip'
+                    print 'exists, skip'
         except:
             id_legal = False
             valid = False
@@ -70,26 +107,8 @@ def play_list(url):
         print 'Done, exiting.'
         return True
 
-def write_file(i):
-    jswrite = "{title:'"+ i['title'] +"',artist:'"+ i['artist'] +"',album:'"+ i['album'] +"',cover:'http://nyandn.b0.upaiyun.com/cover/"+ i['artist'] + ' - ' + i['title'] + ".jpg',mp3:'http://nyandn.b0.upaiyun.com/mp3/"+ i['artist'] + ' - ' + i['title'] + ".mp3',ogg:'http://nyandn.b0.upaiyun.com/mp3/"+ i['artist'] + ' - ' + i['title']  +".mp3',},"
-    print (jswrite)
-    filein = js_path
-    fileout = filein
-    f = open(filein,'r')
-    filedata = f.read()
-    f.close()
-    newdata = filedata.replace("//ENDOFLIST","//ENDOFLIST\n"+jswrite)
-    f = open(fileout,'w')
-    f.write(newdata)
-    f.close()
-    return True
-
 def convert_url(url):
-    new_url = 'http://' + m10_ip + '/' + url.split('http://')[1]
-    return new_url
-
+    #new_url = 'http://' + m10_ip + '/' + url.split('http://')[1]
+    return url
 
 play_list(url)
-
-
-
