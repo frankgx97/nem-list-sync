@@ -31,11 +31,11 @@ def write_db(i):
         title=i['title'],
         artist=i['artist'],
         album=i['album'],
-        cover='http://static.nyan.ac.cn/nyanfm/cover/' +
-        i['artist'] + ' - ' + i['title'] + '.jpg',
-        mp3='http://static.nyan.ac.cn/nyanfm/mp3/' +
+        cover='http://static.guoduhao.cn/nyanfm/cover/' +
+        i['artist'] + ' - ' + i['title'] + '.jpg!nyanfm.cover',
+        mp3='http://static.guoduhao.cn/nyanfm/mp3/' +
         i['artist'] + ' - ' + i['title'] + '.mp3',
-        ogg='http://static.nyan.ac.cn/nyanfm/mp3/' +
+        ogg='http://static.guoduhao.cn/nyanfm/mp3/' +
         i['artist'] + ' - ' + i['title'] + '.mp3'
     )
     try:

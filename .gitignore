@@ -1,4 +1,7 @@
 configure.py
+cover/
+mp3/
+script.js
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
