@@ -1,0 +1,4 @@
+requests==2.13.0
+pycrypto==2.6.1
+beautifulsoup4==4.6.0
+peewee==2.10.1
