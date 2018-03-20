@@ -106,9 +106,9 @@ def play_list(url):
                 print mp3_path_name
                 if os.path.exists(mp3_path_name) == False and ne.songs_detail_new_api([i['id']])[0]['url'] != None:
                     try:
-                        #os.system(wget_prefix + convert_url(ne.songs_detail_new_api([i['id']])[0]['url']) + '\' -O \'' + mp3_path_name + '\'')
-                        #os.system(wget_prefix + i['album']['picUrl'] + '\' -O \'' + cover_path_name + '\'')
-                        # write_file(song_item)
+                        os.system(wget_prefix + convert_url(ne.songs_detail_new_api([i['id']])[0]['url']) + '\' -O \'' + mp3_path_name + '\'')
+                        os.system(wget_prefix + i['album']['picUrl'] + '\' -O \'' + cover_path_name + '\'')
+                        #write_file(song_item)
                         write_db(song_item)
                         print '**downloaded.**'
                     except Exception, e:
