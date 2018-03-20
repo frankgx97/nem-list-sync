@@ -7,6 +7,8 @@ from api import *
 from configure import *
 from db import *
 
+import requests
+
 # 设置系统默认编码模式
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -26,6 +28,7 @@ def url_split(url):
 
 
 def write_db(i):
+    '''
     song = Song(
         song_id=i['id'],
         title=i['title'],
@@ -43,6 +46,22 @@ def write_db(i):
         print '**db succeed**'
     except:
         print '!!!db error!!!'
+    '''
+    r = requests.post(nyanfm_url,
+    json={
+        'song_id':i['id'],
+        'title':i['title'],
+        'artist':i['artist'],
+        'album':i['album'],
+        'cover':'http://static.guoduhao.cn/nyanfm/cover/' + i['artist'] + ' - ' + i['title'] + '.jpg!nyanfm.cover',
+        'mp3':'http://static.guoduhao.cn/nyanfm/mp3/' + i['artist'] + ' - ' + i['title'] + '.mp3',
+        'lyric':i['lyric'],
+        'key':nyanfm_apikey
+    })
+    if r.json()['code'] == 0:
+        print 'Data writen'
+    else:
+        print 'Write data error'
     return True
 
 
@@ -75,7 +94,8 @@ def play_list(url):
                     'artist': i['artists'][0]['name'],
                     'album': i['album']['name'],
                     'cover_url': i['album']['picUrl'],
-                    'mp3_url': ne.songs_detail_new_api([i['id']])[0]['url']
+                    'mp3_url': ne.songs_detail_new_api([i['id']])[0]['url'],
+                    'lyric': ne.song_lyric(i['id']),
                 }
                 song_list.append(song_item)
                 mp3_path_name = mp3_path + \
@@ -86,14 +106,13 @@ def play_list(url):
                 print mp3_path_name
                 if os.path.exists(mp3_path_name) == False and ne.songs_detail_new_api([i['id']])[0]['url'] != None:
                     try:
-                        os.system(wget_prefix + convert_url(ne.songs_detail_new_api(
-                            [i['id']])[0]['url']) + '\' -O \'' + mp3_path_name + '\'')
-                        os.system(
-                            wget_prefix + i['album']['picUrl'] + '\' -O \'' + cover_path_name + '\'')
+                        #os.system(wget_prefix + convert_url(ne.songs_detail_new_api([i['id']])[0]['url']) + '\' -O \'' + mp3_path_name + '\'')
+                        #os.system(wget_prefix + i['album']['picUrl'] + '\' -O \'' + cover_path_name + '\'')
                         # write_file(song_item)
                         write_db(song_item)
                         print '**downloaded.**'
-                    except:
+                    except Exception, e:
+                        print e
                         print '!!!error while download.!!!'
                 elif ne.songs_detail_new_api([i['id']])[0]['url'] == None:
                     print '!!!resouce not found!!!'
