@@ -28,33 +28,14 @@ def url_split(url):
 
 
 def write_db(i):
-    '''
-    song = Song(
-        song_id=i['id'],
-        title=i['title'],
-        artist=i['artist'],
-        album=i['album'],
-        cover='http://static.guoduhao.cn/nyanfm/cover/' +
-        i['artist'] + ' - ' + i['title'] + '.jpg!nyanfm.cover',
-        mp3='http://static.guoduhao.cn/nyanfm/mp3/' +
-        i['artist'] + ' - ' + i['title'] + '.mp3',
-        ogg='http://static.guoduhao.cn/nyanfm/mp3/' +
-        i['artist'] + ' - ' + i['title'] + '.mp3'
-    )
-    try:
-        song.save()
-        print '**db succeed**'
-    except:
-        print '!!!db error!!!'
-    '''
     r = requests.post(nyanfm_url,
     json={
         'song_id':i['id'],
         'title':i['title'],
         'artist':i['artist'],
         'album':i['album'],
-        'cover':'http://static.guoduhao.cn/nyanfm/cover/' + i['artist'] + ' - ' + i['title'] + '.jpg!nyanfm.cover',
-        'mp3':'http://static.guoduhao.cn/nyanfm/mp3/' + i['artist'] + ' - ' + i['title'] + '.mp3',
+        'cover':'https://static.guoduhao.cn/nyanfm/cover/' + i['artist'] + ' - ' + i['title'] + '.jpg!nyanfm.cover',
+        'mp3':'https://static.guoduhao.cn/nyanfm/mp3/' + i['artist'] + ' - ' + i['title'] + '.mp3',
         'lyric':i['lyric'],
         'key':nyanfm_apikey
     })
@@ -116,6 +97,7 @@ def play_list(url):
                         print '!!!error while download.!!!'
                 elif ne.songs_detail_new_api([i['id']])[0]['url'] == None:
                     print '!!!resouce not found!!!'
+                    write_db(song_item)
                 else:
                     print 'exists, skip'
         except:

@@ -1,0 +1,10 @@
+version: '3'
+services:
+    nemsync:
+        container_name: "nemsync"
+        image: "nyanim/nemsync"
+        volumes:
+         - "/data/web/static/nyanfm/cover:/usr/src/app/cover"
+         - "/data/web/static/nyanfm/mp3:/usr/src/app/mp3"
+         - "./configure.py:/usr/src/app/configure.py"
+        command: python /usr/src/app/sync.py
