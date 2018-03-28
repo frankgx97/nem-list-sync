@@ -97,7 +97,6 @@ def play_list(url):
                         print '!!!error while download.!!!'
                 elif ne.songs_detail_new_api([i['id']])[0]['url'] == None:
                     print '!!!resouce not found!!!'
-                    write_db(song_item)
                 else:
                     print 'exists, skip'
         except:
