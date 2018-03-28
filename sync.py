@@ -5,7 +5,6 @@ import sys
 
 from api import *
 from configure import *
-from db import *
 
 import requests
 
